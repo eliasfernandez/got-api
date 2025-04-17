@@ -14,16 +14,20 @@ servers:
   - description: Local swagger
     url: 'http://localhost:8080/api/'
 tags:
-  - name: private
-    description: Operations for authenticated calls
-  - name: public
-    description: Operations available to anonymous request
+  - name: actor
+    description: Actors
+  - name: character
+    description: Characters
+  - name: linking
+    description: Linking
+  - name: search
+    description: Search
+
 paths:
   /actor:
     get:
       tags:
-        - public
-        - private
+        - actor
 
       parameters:
         - in: query
@@ -47,14 +51,12 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Actor'
+                $ref: '#/components/schemas/ActorList'
         '400':
           description: bad input parameter
     post:
       tags:
-        - private
+        - actor
       summary: adds a Actor
       operationId: addActor
       description: Adds an actor to the API
@@ -75,8 +77,7 @@ paths:
   /actor/{actorId}:
     get:
       tags:
-        - private
-        - public
+        - actor
       summary: Gets an Actor
       operationId: getActor
       parameters:
@@ -94,7 +95,7 @@ paths:
           description: 'Item not found'
     put:
       tags:
-        - private
+        - actor
       summary: modify an Actor
       operationId: modifyActor
       parameters:
@@ -121,7 +122,7 @@ paths:
         description: Actor to modify
     delete:
       tags:
-        - private
+        - actor
       summary: delete an Actor
       operationId: deleteActor
       parameters:
@@ -137,10 +138,11 @@ paths:
           description: 'item deleted'
         '404':
           description: 'Item not found'
+
   /actor/{actorId}/link:
     post:
       tags:
-        - private
+        - linking
       summary: Link character to actor
       operationId: linkCharactersToActor
       parameters:
@@ -155,7 +157,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CharacterUri'
+              type: array
+              items:
+                $ref: '#/components/schemas/CharacterUri'
       responses:
         '200':
           description: 'Item linked'
@@ -166,8 +170,7 @@ paths:
   /character:
     get:
       tags:
-        - public
-        - private
+        - character
       summary: Characters list
       operationId: characterList
       description: |
@@ -195,14 +198,12 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Actor'
+                $ref: '#/components/schemas/CharacterList'
         '400':
           description: bad input parameter
     post:
       tags:
-        - private
+        - character
       summary: adds a Character
       operationId: addCharacter
       description: Adds an character to the API
@@ -224,8 +225,7 @@ paths:
   /character/{characterId}:
     get:
       tags:
-        - private
-        - public
+        - character
       summary: Gets a Character
       operationId: getCharacter
       parameters:
@@ -243,7 +243,7 @@ paths:
           description: 'Item not found'
     put:
       tags:
-        - private
+        - character
       summary: Modify a Character
       operationId: modifyCharacter
       parameters:
@@ -271,7 +271,7 @@ paths:
         description: Character to modify
     delete:
       tags:
-        - private
+        - character
       summary: delete a Character
       operationId: deleteCharacter
       parameters:
@@ -292,7 +292,7 @@ paths:
   /character/{characterId}/link:
     post:
       tags:
-        - private
+        - linking
       summary: Link actors to a character
       operationId: linkActorsToCharacter
       parameters:
@@ -320,8 +320,7 @@ paths:
   /search:
     get:
       tags:
-        - private
-        - public
+        - search
       parameters:
         - in: query
           name: q
@@ -416,3 +415,55 @@ components:
     ActorUri:
         type: string
         example: '/api/actor/1'
+
+    CharacterList:
+      type: object
+      required:
+        - page
+        - limit
+        - total
+        - last
+        - results
+      properties:
+        page:
+          type: integer
+          example: 1
+        limit:
+          type: integer
+          example: 20
+        total:
+          type: integer
+          example: 100
+        last:
+          type: integer
+          example: 5
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Character'
+
+    ActorList:
+      type: object
+      required:
+        - page
+        - limit
+        - total
+        - last
+        - results
+      properties:
+        page:
+          type: integer
+          example: 1
+        limit:
+          type: integer
+          example: 20
+        total:
+          type: integer
+          example: 100
+        last:
+          type: integer
+          example: 5
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Actor'

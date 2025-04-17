@@ -2,10 +2,26 @@ framework:
     messenger:
         transports:
             async: '%env(MESSENGER_TRANSPORT_DSN)%'
+            sync: 'sync://'
 
         routing:
-             'App\Message\DeleteMessage': async
-             'App\Message\SyncMessage': async
+            # queue
+            'App\Infrastructure\Messenger\Message\DeleteMessage': async
+            'App\Infrastructure\Messenger\Message\SyncMessage': async
+            # sync
+            'App\Application\Actor\Command\CreateActorCommand': sync
+            'App\Application\Actor\Command\DeleteActorCommand': sync
+            'App\Application\Actor\Command\LinkCharacterToActorCommand': sync
+            'App\Application\Actor\Command\UpdateActorCommand': sync
+            'App\Application\Actor\Query\GetActorByIdQuery': sync
+            'App\Application\Actor\Query\ListActorsQuery': sync
+            'App\Application\Character\Command\CreateCharacterCommand': sync
+            'App\Application\Character\Command\DeleteCharacterCommand': sync
+            'App\Application\Character\Command\LinkActorsToCharacterCommand': sync
+            'App\Application\Character\Command\UpdateCharacterCommand': sync
+            'App\Application\Character\Query\GetCharacterByIdQuery': sync
+            'App\Application\Character\Query\ListCharactersQuery': sync
+            'App\Application\Character\Query\SearchCharactersQuery': sync
 
 when@test:
    framework:

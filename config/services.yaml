@@ -21,7 +21,7 @@ services:
         resource: '../src/'
         exclude:
             - '../src/DependencyInjection/'
-            - '../src/Entity/'
+            - '../src/Domain/'
             - '../src/Kernel.php'
 
     # add more service definitions when explicit configuration is needed
@@ -30,12 +30,15 @@ services:
         tags:
             - { name: kernel.event_listener, event: kernel.exception }
 
-    Elastic\Elasticsearch\ClientInterface:
-        factory: ['App\Elasticsearch\ClientFactory', 'create']
+    Elastic\Elasticsearch\Client:
+        factory: ['App\Infrastructure\Persistence\Elasticsearch\ClientFactory', 'create']
         arguments:
           $hosts: '%env(ELASTICSEARCH_HOSTS)%'
           $caBundle: '%env(ELASTIC_CA_DIR)%'
           $password: '%env(ELASTIC_PASSWORD)%'
 
-    App\Factory\DtoFactoryInterface:
-        alias: 'App\Factory\CharacterDtoFactory'
+    App\Domain\Character\Repository\CharacterRepositoryInterface:
+        alias: 'App\Infrastructure\Persistence\Doctrine\Repository\CharacterRepository'
+
+    App\Domain\Actor\Repository\ActorRepositoryInterface:
+        alias: 'App\Infrastructure\Persistence\Doctrine\Repository\ActorRepository'

@@ -69,6 +69,7 @@ services:
       - database_data:/var/lib/postgresql/data:rw
     networks:
       - backbone
+
   setup:
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
     volumes:
