@@ -1,0 +1,418 @@
+openapi: 3.0.0
+info:
+  description: Game Of Thrones Characters API
+  version: 1.0.0
+  title: GOT Characters API
+  contact:
+    email: eliasfernandez@gmail.com
+    name: Elías
+    url: 'https://www.eliasfernandez.net'
+  license:
+    name: MIT
+    url: 'https://mit-license.org/'
+servers:
+  - description: Local swagger
+    url: 'http://localhost:8080/api/'
+tags:
+  - name: private
+    description: Operations for authenticated calls
+  - name: public
+    description: Operations available to anonymous request
+paths:
+  /actor:
+    get:
+      tags:
+        - public
+        - private
+
+      parameters:
+        - in: query
+          name: page
+          description: Page
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+        - in: query
+          name: limit
+          description: maximum number of records to return per page
+          schema:
+            type: integer
+            format: int32
+            minimum: 10
+            maximum: 100
+      responses:
+        '200':
+          description: list matching criteria
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Actor'
+        '400':
+          description: bad input parameter
+    post:
+      tags:
+        - private
+      summary: adds a Actor
+      operationId: addActor
+      description: Adds an actor to the API
+      responses:
+        '201':
+          description: 'item created'
+        '400':
+          description: 'Invalid input, object invalid'
+        '409':
+          description: 'An existing item already exists'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Actor'
+        description: Actor to add
+
+  /actor/{actorId}:
+    get:
+      tags:
+        - private
+        - public
+      summary: Gets an Actor
+      operationId: getActor
+      parameters:
+        - in: path
+          name: actorId
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the actor to get
+      description: Gets an actor from the API
+      responses:
+        '200':
+          description: 'Item get success'
+        '404':
+          description: 'Item not found'
+    put:
+      tags:
+        - private
+      summary: modify an Actor
+      operationId: modifyActor
+      parameters:
+        - in: path
+          name: actorId
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the actor to edit
+
+      description: Modify an actor in the API
+      responses:
+        '200':
+          description: 'item modified'
+        '400':
+          description: 'Invalid input, object invalid'
+        '404':
+          description: 'Item not found'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Actor'
+        description: Actor to modify
+    delete:
+      tags:
+        - private
+      summary: delete an Actor
+      operationId: deleteActor
+      parameters:
+        - in: path
+          name: actorId
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the actor to delete
+      description: Delete an actor in the API
+      responses:
+        '204':
+          description: 'item deleted'
+        '404':
+          description: 'Item not found'
+  /actor/{actorId}/link:
+    post:
+      tags:
+        - private
+      summary: Link character to actor
+      operationId: linkCharactersToActor
+      parameters:
+        - in: path
+          name: actorId
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the actor to relate with
+      description: Link characters to the actor
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CharacterUri'
+      responses:
+        '200':
+          description: 'Item linked'
+        '400':
+          description: 'Invalid input, object invalid'
+        '404':
+          description: 'Not found'
+  /character:
+    get:
+      tags:
+        - public
+        - private
+      summary: Characters list
+      operationId: characterList
+      description: |
+        List of characters sorted in descendent order by name
+        and paginated
+      parameters:
+        - in: query
+          name: page
+          description: Page
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+        - in: query
+          name: limit
+          description: maximum number of records to return per page
+          schema:
+            type: integer
+            format: int32
+            minimum: 10
+            maximum: 100
+      responses:
+        '200':
+          description: list matching criteria
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Actor'
+        '400':
+          description: bad input parameter
+    post:
+      tags:
+        - private
+      summary: adds a Character
+      operationId: addCharacter
+      description: Adds an character to the API
+      responses:
+        '201':
+          description: 'item created'
+        '400':
+          description: 'Invalid input, object invalid'
+        '401':
+          description: 'Unauthorized'
+        '409':
+          description: 'An existing item already exists'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Character'
+        description: Character to add
+  /character/{characterId}:
+    get:
+      tags:
+        - private
+        - public
+      summary: Gets a Character
+      operationId: getCharacter
+      parameters:
+        - in: path
+          name: characterId
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the character to get
+      description: Gets a character from the API
+      responses:
+        '200':
+          description: 'Item get success'
+        '404':
+          description: 'Item not found'
+    put:
+      tags:
+        - private
+      summary: Modify a Character
+      operationId: modifyCharacter
+      parameters:
+        - in: path
+          name: characterId
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the character to edit
+      description: Modify a character in the API
+      responses:
+        '200':
+          description: 'item modified'
+        '400':
+          description: 'Invalid input, object invalid'
+        '401':
+          description: 'Unauthorized'
+        '404':
+          description: 'Item not found'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Character'
+        description: Character to modify
+    delete:
+      tags:
+        - private
+      summary: delete a Character
+      operationId: deleteCharacter
+      parameters:
+        - in: path
+          name: characterId
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the character to delete
+      description: Delete a character in the API
+      responses:
+        '204':
+          description: 'item deleted'
+        '401':
+          description: 'Unauthorized'
+        '404':
+          description: 'Item not found'
+  /character/{characterId}/link:
+    post:
+      tags:
+        - private
+      summary: Link actors to a character
+      operationId: linkActorsToCharacter
+      parameters:
+        - in: path
+          name: characterId
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the character to relate with
+      description: Link actors (and seasons) to a character
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/ActorUri'
+      responses:
+        '200':
+          description: 'Item linked'
+        '400':
+          description: 'Invalid input, object invalid'
+        '404':
+          description: 'Not found'
+  /search:
+    get:
+      tags:
+        - private
+        - public
+      parameters:
+        - in: query
+          name: q
+          description: Search query
+          schema:
+            type: string
+        - in: query
+          name: page
+          description: Page
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+        - in: query
+          name: limit
+          description: maximum number of records to return per page
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 100
+      responses:
+        '200':
+          description: list matching criteria
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Actor'
+        '400':
+          description: bad input parameter
+
+components:
+  schemas:
+    Actor:
+      type: object
+      required:
+        - name
+        - character
+      properties:
+        name:
+          type: string
+          example: Kit Harington
+        link:
+          type: string
+          example: https://www.imdb.com/name/nm3229685/
+        seasons:
+          type: array
+          items:
+            type: integer
+          example: []
+        character:
+          type: object
+          $ref: '#/components/schemas/CharacterUri'
+          example: '/api/character/1'
+    Character:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          example: Jon Snow
+        link:
+          type: string
+          example: https://www.imdb.com/character/ch0155777/
+        royal:
+          type: boolean
+          example: true
+        nickname:
+          type: string
+          example: The bastard
+        kingsguard:
+          type: boolean
+          example: false
+        thumbnail:
+          type: string
+          example: https://images-na.ssl-images-amazon.com/images/M/MV5BMTkwMjUxMDk2OV5BMl5BanBnXkFtZTcwMzg3MTg4OQ@@._V1._SX100_SY140_.jpg
+        image:
+          type: string
+          example: https://images-na.ssl-images-amazon.com/images/M/MV5BMTkwMjUxMDk2OV5BMl5BanBnXkFtZTcwMzg3MTg4OQ@@._V1._SX100_SY140_.jpg
+        actors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActorUri'
+
+    CharacterUri:
+      type: string
+      example: '/api/character/1'
+
+    ActorUri:
+        type: string
+        example: '/api/actor/1'

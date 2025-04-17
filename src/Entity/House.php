@@ -6,9 +6,10 @@ use App\Repository\HouseRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: HouseRepository::class)]
-final class House
+class House
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -21,8 +22,11 @@ final class House
     #[ORM\ManyToMany(targetEntity: Character::class, mappedBy: 'houses')]
     private Collection $characters;
 
-    public function __construct(#[ORM\Column(length: 255)]
-    private ?string $name = null)
+    public function __construct(
+        #[ORM\Column(length: 255, unique: true)]
+        #[Groups('es:character')]
+        private ?string $name = null
+    )
     {
         $this->characters = new ArrayCollection();
     }

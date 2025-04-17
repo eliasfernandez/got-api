@@ -6,26 +6,24 @@ use App\Repository\CharacterRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: CharacterRepository::class)]
-final class Character
+#[ORM\HasLifecycleCallbacks]
+class Character implements EntityInterface
 {
+    use TimestampTrait;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $thumbnail;
-
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $image;
-
-
     /**
      * @var Collection<int, Actor>
      */
-    #[ORM\OneToMany(targetEntity: Actor::class, mappedBy: 'character', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: Actor::class, mappedBy: 'character', orphanRemoval: false)]
+    #[Groups('es:character')]
     private Collection $actors;
 
     #[ORM\ManyToMany(targetEntity: self::class, inversedBy: 'parents')]
@@ -84,25 +82,30 @@ final class Character
     private Collection $allies;
 
     #[ORM\ManyToMany(targetEntity: House::class, inversedBy: 'characters')]
+    #[Groups('es:character')]
     private Collection $houses;
 
-
     public function __construct(
-        #[ORM\Column(length: 255)]
+        #[ORM\Column(length: 255, unique: true)]
+        #[Groups('es:character')]
         private string $name,
-        #[ORM\Column(length: 255, nullable: true)]
-        private ?string $link = null,
+        #[ORM\Column(length: 255, unique: true)]
+        #[Groups('es:character')]
+        private string $link,
         #[ORM\Column]
+        #[Groups('es:character')]
         private bool $royal = false,
         #[ORM\Column(length: 255, nullable: true)]
+        #[Groups('es:character')]
         private ?string $nickname = null,
         #[ORM\Column]
+        #[Groups('es:character')]
         private bool $kingsguard = false,
-        ?CharacterImage $thumbnail = null,
-        ?CharacterImage $image = null,
+        #[ORM\Column(length: 255, nullable: true)]
+        private ?string $thumbnail = null,
+        #[ORM\Column(length: 255, nullable: true)]
+        private ?string $image = null
     ) {
-        $this->image = (string) $image;
-        $this->thumbnail = (string) $thumbnail;
         $this->actors = new ArrayCollection();
         $this->parentOf = new ArrayCollection();
         $this->parents = new ArrayCollection();
@@ -236,6 +239,15 @@ final class Character
             if ($actor->getCharacter() === $this) {
                 $actor->setCharacter(null);
             }
+        }
+
+        return $this;
+    }
+
+    public function emptyActors(): static
+    {
+        foreach ($this->actors as $actor) {
+            $this->removeActor($actor);
         }
 
         return $this;
@@ -596,6 +608,15 @@ final class Character
     public function removeHouse(House $house): static
     {
         $this->houses->removeElement($house);
+
+        return $this;
+    }
+
+    public function emptyHouses(): static
+    {
+        foreach ($this->houses as $house) {
+            $this->removeHouse($house);
+        }
 
         return $this;
     }

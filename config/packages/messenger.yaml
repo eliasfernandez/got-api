@@ -1,0 +1,14 @@
+framework:
+    messenger:
+        transports:
+            async: '%env(MESSENGER_TRANSPORT_DSN)%'
+
+        routing:
+             'App\Message\DeleteMessage': async
+             'App\Message\SyncMessage': async
+
+when@test:
+   framework:
+       messenger:
+           transports:
+               async: 'sync://'

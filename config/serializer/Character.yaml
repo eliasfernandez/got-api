@@ -1,0 +1,4 @@
+App\Entity\Character:
+    attributes:
+        actors:
+            max_depth: 1

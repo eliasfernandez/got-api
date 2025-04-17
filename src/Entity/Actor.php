@@ -5,24 +5,30 @@ namespace App\Entity;
 use App\Repository\ActorRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: ActorRepository::class)]
-final class Actor
+#[ORM\HasLifecycleCallbacks]
+class Actor implements EntityInterface
 {
+    use TimestampTrait;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
     public function __construct(
-        #[ORM\ManyToOne(inversedBy: 'actors')]
-        #[ORM\JoinColumn(nullable: false)]
-        private ?Character $character,
         #[ORM\Column(length: 255)]
+        #[Groups(['es:character', 'es:actor'])]
         private string $name,
-        #[ORM\Column(length: 255, nullable: true)]
-        private ?string $link = null,
+        #[ORM\Column(length: 255, unique: true)]
+        private ?string $link,
+        #[ORM\ManyToOne(inversedBy: 'actors')]
+        #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+        private ?Character $character = null,
         #[ORM\Column(type: Types::SIMPLE_ARRAY, nullable: true)]
+        #[Groups('es:actor')]
         private array $seasons = [],
     ) {
     }
@@ -58,7 +64,7 @@ final class Actor
 
     public function getSeasons(): array
     {
-        return $this->seasons;
+        return array_map(fn (string $season) => (int) $season, $this->seasons);
     }
 
     public function setSeasons(array $seasons): static

@@ -19,6 +19,7 @@ RUN set -eux; \
 		postgresql-dev \
 		zlib-dev \
 		libpng-dev \
+        rabbitmq-c-dev \
 	; \
 	\
 	docker-php-ext-configure zip; \
@@ -31,11 +32,13 @@ RUN set -eux; \
 	; \
 	pecl install \
         apcu-${APCU_VERSION} \
+        amqp \
 	; \
 	pecl clear-cache; \
 	docker-php-ext-enable \
 		opcache \
         apcu \
+        amqp \
 	; \
 	\
 	runDeps="$( \
@@ -48,10 +51,12 @@ RUN set -eux; \
 	\
 	apk del .build-deps
 
+WORKDIR /var/www
+
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 RUN ln -s $PHP_INI_DIR/php.ini-production $PHP_INI_DIR/php.ini
 
-# https://getcomposer.org/doc/03-cli.md#composer-allow-superuser
+
 ENV COMPOSER_ALLOW_SUPERUSER=1
 # install Symfony Flex globally to speed up download of Composer packages (parallelized prefetching)
 RUN set -eux; \
@@ -60,4 +65,12 @@ RUN set -eux; \
 	composer clear-cache
 ENV PATH="${PATH}:/root/.composer/vendor/bin"
 
-WORKDIR /app
+COPY . /var/www
+
+COPY php/entrypoint.sh /usr/local/bin/php-entrypoint
+RUN chmod +x /usr/local/bin/php-entrypoint
+
+ENTRYPOINT ["php-entrypoint"]
+
+EXPOSE 9000
+CMD ["php-fpm"]

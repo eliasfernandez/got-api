@@ -10,6 +10,10 @@ services:
     _defaults:
         autowire: true      # Automatically injects dependencies in your services.
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+        bind:
+            $projectDir: '%kernel.project_dir%'
+            $environment: '%env(APP_ENV)%'
+            $elasticIndex: 'got-%env(APP_ENV)%'
 
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
@@ -22,3 +26,16 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+    App\EventListener\ExceptionListener:
+        tags:
+            - { name: kernel.event_listener, event: kernel.exception }
+
+    Elastic\Elasticsearch\ClientInterface:
+        factory: ['App\Elasticsearch\ClientFactory', 'create']
+        arguments:
+          $hosts: '%env(ELASTICSEARCH_HOSTS)%'
+          $caBundle: '%env(ELASTIC_CA_DIR)%'
+          $password: '%env(ELASTIC_PASSWORD)%'
+
+    App\Factory\DtoFactoryInterface:
+        alias: 'App\Factory\CharacterDtoFactory'
