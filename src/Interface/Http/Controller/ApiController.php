@@ -10,28 +10,37 @@ abstract class ApiController extends AbstractController
 {
     protected const PAGE_DEFAULT = 1;
     protected const MAX_RESULTS_PER_PAGE = 20;
+    protected const MAX_RESULTS_PER_PAGE_LIMIT = 100;
 
     protected function getPage(Request $request): int
     {
         try {
-            return $request->query->getInt('page', self::PAGE_DEFAULT);
+            $page = $request->query->getInt('page', self::PAGE_DEFAULT);
+            if ($page > 0) {
+                 return $page;
+            }
         } catch (\Exception $_) {
-            throw new BadRequestHttpException('Invalid `page` request');
         }
+
+        throw new BadRequestHttpException('Invalid `page` request');
     }
 
     protected function getLimit(Request $request): int
     {
         try {
-            return $request->query->getInt('limit', self::MAX_RESULTS_PER_PAGE);
+            $limit = $request->query->getInt('limit', self::MAX_RESULTS_PER_PAGE);
+            if ($limit > 0 && $limit <= self::MAX_RESULTS_PER_PAGE_LIMIT) {
+                 return $limit;
+            }
         } catch (\Exception $_) {
-            throw new BadRequestHttpException('Invalid `limit` request');
         }
+
+        throw new BadRequestHttpException('Invalid `limit` request');
     }
 
     protected function getSearchQuery(Request $request): string
     {
-        $query = $request->get('q', '*');
+        $query = $request->query->getString('q', '*');
 
         return empty($query) ? '*' : $query;
     }
